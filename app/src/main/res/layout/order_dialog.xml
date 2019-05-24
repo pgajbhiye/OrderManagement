@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_marginStart="20dp"
+    android:layout_marginEnd="20dp"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <EditText
+        android:id="@+id/orderNum"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter order numer"
+        android:inputType="number"
+        android:visibility="gone" />
+
+    <EditText
+        android:id="@+id/orderDate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter order date"
+        android:inputType="date"
+        android:paddingTop="20dp" />
+
+
+    <EditText
+        android:id="@+id/customerBuyerName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter customer buyer name"
+        android:paddingTop="20dp" />
+
+    <EditText
+        android:id="@+id/customerAddress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter customer address"
+        android:paddingTop="20dp" />
+
+    <EditText
+        android:id="@+id/customerPhoneNumber"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter customer phone number"
+        android:inputType="phone"
+        android:paddingTop="20dp" />
+
+    <EditText
+        android:id="@+id/orderTotal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter order total"
+        android:inputType="number"
+        android:paddingTop="20dp" />
+
+</LinearLayout>

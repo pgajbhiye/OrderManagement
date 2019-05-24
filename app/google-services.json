@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "1033380964544",
+    "firebase_url": "https://ordermanagement-9728b.firebaseio.com",
+    "project_id": "ordermanagement-9728b",
+    "storage_bucket": "ordermanagement-9728b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1033380964544:android:c3949989b9388430",
+        "android_client_info": {
+          "package_name": "com.orion.ordermanagement"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1033380964544-uqlhhuqo0sitvvusu59cftq5tqippt7o.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBmvyibBZwWet7do74wO13GgR27tHZSiOE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1033380964544-uqlhhuqo0sitvvusu59cftq5tqippt7o.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
