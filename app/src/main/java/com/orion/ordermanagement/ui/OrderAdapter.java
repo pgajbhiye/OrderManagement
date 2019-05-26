@@ -1,7 +1,11 @@
 package com.orion.ordermanagement.ui;
 
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +17,7 @@ import com.orion.ordermanagement.R;
 import com.orion.ordermanagement.interfaces.OnEditOrderListener;
 import com.orion.ordermanagement.interfaces.OnResultCallBack;
 import com.orion.ordermanagement.model.Order;
+import com.orion.ordermanagement.util.Constants;
 import com.orion.ordermanagement.util.FirebaseUtil;
 
 import java.util.ArrayList;
@@ -25,7 +30,7 @@ class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHolder> {
     private final OnEditOrderListener editOrderListener;
     private List<Order> orderList = new ArrayList<>();
 
-    OrderAdapter(Context context, OnResultCallBack callBack, OnEditOrderListener editOrderListener) {
+    public OrderAdapter(Context context, OnResultCallBack callBack, OnEditOrderListener editOrderListener) {
         this.context = context;
         this.callBack = callBack;
         this.editOrderListener = editOrderListener;
@@ -71,6 +76,7 @@ class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHolder> {
             deleteButton = itemView.findViewById(R.id.delete);
             editButton.setOnClickListener(this);
             deleteButton.setOnClickListener(this);
+            textView.setOnClickListener(this);
         }
 
         @Override
@@ -85,11 +91,39 @@ class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHolder> {
             } else if (v.getId() == R.id.delete) {
                 //Handle Delete button click
                 int adapterPosition = this.getAdapterPosition();
-                if (adapterPosition != RecyclerView.NO_POSITION) {
-                    FirebaseUtil.deleteOrder(context, orderList.get(adapterPosition), callBack);
+                showDeleteDialog(adapterPosition);
+            } else if (v.getId() == R.id.order_name) {
+                Order order = orderList.get(this.getAdapterPosition());
+                Intent intent = new Intent(context, OrderDetailsActivity.class);
 
-                }
+                intent.putExtra(Constants.ORDER_DETAILS_KEY, order);
+                context.startActivity(intent);
+
             }
         }
+    }
+
+    private void showDeleteDialog(final int adapterPosition) {
+        final AlertDialog alertDialog = new AlertDialog.Builder(context).setTitle("Do you want to delete this order ? ").setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+                if (adapterPosition != RecyclerView.NO_POSITION) {
+                    FirebaseUtil.deleteOrder(context, orderList.get(adapterPosition), callBack);
+                }
+
+            }
+        }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+
+            }
+        }).create();
+
+        if (!alertDialog.isShowing()) {
+            alertDialog.show();
+        }
+
     }
 }

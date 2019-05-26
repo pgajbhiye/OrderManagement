@@ -18,6 +18,8 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.orion.ordermanagement.R;
+import com.orion.ordermanagement.interfaces.OnResultCallBack;
+import com.orion.ordermanagement.interfaces.ProgressListener;
 import com.orion.ordermanagement.util.Constants;
 import com.orion.ordermanagement.util.FirebaseUtil;
 import com.orion.ordermanagement.util.Utils;
@@ -29,11 +31,15 @@ public class LoginScreen extends Fragment implements View.OnClickListener {
     EditText userNameEt, passwordEt;
     private String userName, password = "";
     private CheckBox checkBox;
+    private ProgressListener progressListener;
 
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+        if (context instanceof ProgressListener) {
+            progressListener = (ProgressListener) context;
+        }
         this.context = context;
     }
 
@@ -47,12 +53,34 @@ public class LoginScreen extends Fragment implements View.OnClickListener {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.login_screen, null);
+
         userNameEt = view.findViewById(R.id.userName);
         passwordEt = view.findViewById(R.id.password);
         checkBox = view.findViewById(R.id.checkBox);
         Button login = view.findViewById(R.id.login);
+        login.setEnabled(true);
         login.setOnClickListener(this);
 
+
+        if (getArguments() != null) {
+            Bundle b = getArguments();
+            String email = b.getString("email", "");
+            String password = b.getString("password", "");
+            if (!TextUtils.isEmpty(email)) {
+                this.userName = email;
+                userNameEt.setText(this.userName);
+
+            }
+
+            if (!TextUtils.isEmpty(password)) {
+                this.password = password;
+                this.password = password;
+
+                passwordEt.setText(password);
+
+            }
+
+        }
         if (!TextUtils.isEmpty(Utils.getPrefString(context, Constants.User_NAME))) {
             String userName = Utils.getPrefString(context, Constants.User_NAME);
             this.userName = userName;
@@ -115,20 +143,35 @@ public class LoginScreen extends Fragment implements View.OnClickListener {
 
 
     @Override
-    public void onClick(View v) {
+    public void onClick(final View v) {
         if (v.getId() == R.id.login) {
+            v.setEnabled(false);
             if (Utils.hasAllLoginFields(userName, password)) {
+                progressListener.setProgressVisibility(true);
 
                 handleRememberMe();
                 //persist the data in Firebase Db only if the user does not exists in db yet
-                FirebaseUtil.createUser(context, userName);
+                FirebaseUtil.createUser(context, userName, new OnResultCallBack() {
+                    @Override
+                    public void onResult(boolean result) {
+                        progressListener.setProgressVisibility(false);
 
-                if (getActivity() != null) {
-                    getActivity().finish();
-                }
-                Intent intent = new Intent(context, OrderActivity.class);
-                startActivity(intent);
+                        if (result) {
+                            if (getActivity() != null) {
+                                getActivity().finish();
+                            }
+                            Intent intent = new Intent(context, OrderActivity.class);
+                            startActivity(intent);
+                        } else {
+                            v.setEnabled(true);
+                            Toast.makeText(context, "Unable to login. Please check your internet", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+
+
             } else {
+                v.setEnabled(true);
                 Toast.makeText(context, "Enter all your details", Toast.LENGTH_SHORT).show();
             }
         }

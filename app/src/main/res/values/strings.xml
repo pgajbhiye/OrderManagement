@@ -1,4 +1,19 @@
 <resources>
     <string name="app_name">OrderManagement</string>
     <string name="remember_me">Remember Me</string>
+    <string name="empty_msg_error">Fields cannot be empty</string>
+    <string name="invalid_first_name_msg">Enter valid first name</string>
+    <string name="invalid_last_name_msg">Enter valid last name</string>
+    <string name="invalid_email_msg">Enter a valid emailEt address</string>
+    <string name="invalid_password_msg">Password should start with alpha character and should contain alpha numeric characters</string>
+    <string name="order_id_label">Order Id :</string>
+    <string name="order_due_label">Order Due Date :</string>
+    <string name="order_customer_name_label">Customer Name :</string>
+    <string name="order_customer_address_label">Customer Address :</string>
+    <string name="order_customer_phone_label">Customer Phone Number :</string>
+    <string name="order_total_label">Order Total :</string>
+    <string name="order_lat_label">Latitude :</string>
+    <string name="order_long_label">Longitude :</string>
+    <string name="order_city_label">City :</string>
+    <string name="order_country_label">Country :</string>
 </resources>

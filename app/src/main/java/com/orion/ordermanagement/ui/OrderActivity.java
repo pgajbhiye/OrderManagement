@@ -1,22 +1,21 @@
 package com.orion.ordermanagement.ui;
 
 import android.content.DialogInterface;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.Editable;
 import android.text.TextUtils;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.orion.ordermanagement.R;
@@ -37,11 +36,14 @@ public class OrderActivity extends AppCompatActivity implements OrderCallBack, O
     private RecyclerView recyclerView;
     private OrderAdapter orderAdapter;
     private String userId;
+    private ProgressBar progressBar;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.order_container);
+        progressBar = findViewById(R.id.progress);
+        progressBar.setVisibility(View.VISIBLE);
 
         //Use this id is Firebase db generated inside json for unique user
         userId = Utils.getPrefString(this, Constants.USER_ID);
@@ -51,7 +53,6 @@ public class OrderActivity extends AppCompatActivity implements OrderCallBack, O
 
         FirebaseUtil.getAllOrders(this, userId, this);
         orderAdapter = new OrderAdapter(this, this, this);
-        //orderAdapter.setData(new ArrayList<Order>());
         recyclerView.setAdapter(orderAdapter);
 
     }
@@ -105,9 +106,25 @@ public class OrderActivity extends AppCompatActivity implements OrderCallBack, O
 
         AlertDialog alertDialog = new AlertDialog.Builder(this)
                 .setView(view)
-                .setPositiveButton("Done", new DialogInterface.OnClickListener() {
+                .setCancelable(false)
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+
+                    }
+                })
+                .setPositiveButton("Done", null)
+                .create();
+
+        alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(final DialogInterface dialog) {
+                Button button = ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_POSITIVE);
+                button.setOnClickListener(new View.OnClickListener() {
+
+                    @Override
+                    public void onClick(View view) {
 
                         int orderNum = 0;
                         String orderDate = "";
@@ -130,14 +147,31 @@ public class OrderActivity extends AppCompatActivity implements OrderCallBack, O
                         }
 
 
+                        Utils.GeoPoint geoCode = Utils.getGeoCode(OrderActivity.this, customerAddress);
+                        double latitude = -1;
+                        double longitude = -1;
+                        String cityName = "";
+                        String stateName = "";
+                        String country = "";
+                        if (geoCode != null) {
+                            latitude = geoCode.getLatitude();
+                            longitude = geoCode.getAlong();
+                            cityName = geoCode.getCityName();
+                            stateName = geoCode.getStateName();
+                            country = geoCode.getCountryName();
+
+                        }
+
                         //Creating new order. Edit Mode is off
-                        Order newOrder = new Order(orderDate, customerBuyerName, customerAddress, customerPhoneNumber, orderTotal, 0.1, 0.1); //TODO: add support for lat along later
+                        Order newOrder = new Order(orderDate, customerBuyerName, customerAddress, customerPhoneNumber, orderTotal, latitude, longitude, cityName, stateName, country); //TODO: add support for lat along later
                         if (newOrder.isValidOrder()) {
+                            dialog.dismiss();
+                            progressBar.setVisibility(View.VISIBLE);
+
                             //Edit Mode is On when passed order!=null. And update the orderid on done btn click
                             if (order != null) {
                                 newOrder.setOrderId(order.getOrderId());
                             }
-
 
                             FirebaseUtil.saveOrder(OrderActivity.this, newOrder);
                             Log.d(LOG_TAG, "Retrieving the orders: after new order " + customerBuyerName);
@@ -145,15 +179,17 @@ public class OrderActivity extends AppCompatActivity implements OrderCallBack, O
                         } else {
                             Toast.makeText(OrderActivity.this, "Fill all order details", Toast.LENGTH_SHORT).show();
                         }
-
                     }
-                })
-                .create();
+                });
+
+            }
+        });
 
         if (!alertDialog.isShowing()) {
             alertDialog.show();
         }
     }
+
 
     private String getValue(EditText editText) {
         if (editText.getText() != null) {
@@ -165,6 +201,8 @@ public class OrderActivity extends AppCompatActivity implements OrderCallBack, O
 
     @Override
     public void onOrdersFetched(List<Order> orders) {
+        progressBar.setVisibility(View.GONE);
+
         if (!orders.isEmpty()) {
             recyclerView.setVisibility(View.VISIBLE);
             orderAdapter.setData(orders);
@@ -179,6 +217,7 @@ public class OrderActivity extends AppCompatActivity implements OrderCallBack, O
     @Override
     public void onResult(boolean result) {
         if (result) {
+            progressBar.setVisibility(View.VISIBLE);
             //Fetch the orders from db and refresh the list
             FirebaseUtil.getAllOrders(OrderActivity.this, userId, OrderActivity.this);
         } else {

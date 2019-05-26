@@ -5,8 +5,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -73,10 +71,11 @@ public class FirebaseUtil {
 
     }
 
-    public static void createUser(final Context context, final String userName) {
+    public static void createUser(final Context context, final String userName, final OnResultCallBack callBack) {
         checkIfUserExistsInDb(context, userName, new OnResultCallBack() {
             @Override
             public void onResult(boolean result) {
+                Log.d(LOG_TAG, "User exists in db ? " + result);
                 if (!result) {
                     DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference(DB_KEYS.USERS);
                     String userId = dbRef.push().getKey();
@@ -84,25 +83,40 @@ public class FirebaseUtil {
                     User user = new User(userName);
                     dbRef.child(userId).setValue(user);
 
+                    Log.d(LOG_TAG, "Creating  userId" + userId);
                     //Persist user id for future CRUD operations
                     Utils.persistString(context, Constants.USER_ID, userId);
                 }
+                callBack.onResult(true);
             }
         });
     }
 
-    private static void checkIfUserExistsInDb(Context context, String userName, final OnResultCallBack callBack) {
+    private static void checkIfUserExistsInDb(final Context context, final String userName, final OnResultCallBack callBack) {
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child(DB_KEYS.USERS);
 
         ref.orderByChild(DB_KEYS.EMAIL).equalTo(userName).addListenerForSingleValueEvent(new ValueEventListener() {
 
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot != null && dataSnapshot.exists()) {
+                Log.d(LOG_TAG, "Users keys :" + dataSnapshot.getKey());
+                if (dataSnapshot.exists()) {
                     Log.d(LOG_TAG, "Email exists in db already ??" + dataSnapshot.exists());
-                }
-                callBack.onResult(dataSnapshot != null && dataSnapshot.exists());
 
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        User user = snapshot.getValue(User.class);
+                        if (user != null) {
+                            user.setUserId(snapshot.getKey());
+                            if (userName.equals(user.getEmail())) {
+                                Log.d(LOG_TAG, "found existing user id " + user.getUserId() + "for " + user.getEmail());
+                                Utils.persistString(context, Constants.USER_ID, user.getUserId());
+                                break;
+                            }
+                        }
+                    }
+
+                }
+                callBack.onResult(dataSnapshot.exists());
             }
 
             @Override
@@ -136,6 +150,7 @@ public class FirebaseUtil {
     public static void getAllOrders(Context context, String userId, final OrderCallBack callback) {
         DatabaseReference dbRefOrder = FirebaseDatabase.getInstance().getReference(DB_KEYS.ORDERS);
 
+        Log.d(LOG_TAG, " User id " + userId);
         dbRefOrder.orderByChild(DB_KEYS.USER_ID).equalTo(userId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -182,25 +197,5 @@ public class FirebaseUtil {
         });
 
     }
-
-   /* public static void updateOrder(Order order) {
-        DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference(DB_KEYS.ORDERS);
-        dbRefOrder.child(order.getOrderId()).removeValue(new DatabaseReference.CompletionListener() {
-            @Override
-            public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
-                Log.d(LOG_TAG, "Delete Operation " + (databaseError != null ? databaseError.getCode() : ""));
-                if (databaseError == null) {
-                    callBack.onResult(true);
-                    return;
-                }
-
-                callBack.onResult(false);
-
-            }
-        });
-
-        dbRef.setValue(order);
-
-    }*/
 
 }

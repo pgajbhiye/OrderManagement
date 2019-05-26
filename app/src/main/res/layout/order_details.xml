@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingTop="50dp">
+
+
+    <include
+        android:id="@+id/zero"
+        layout="@layout/order_item_container" />
+
+    <include
+        android:id="@+id/one"
+        layout="@layout/order_item_container" />
+
+    <include
+        android:id="@+id/two"
+        layout="@layout/order_item_container" />
+
+
+    <include
+        android:id="@+id/three"
+        layout="@layout/order_item_container" />
+
+
+    <include
+        android:id="@+id/four"
+        layout="@layout/order_item_container" />
+
+
+    <include
+        android:id="@+id/five"
+        layout="@layout/order_item_container" />
+
+    <include
+        android:id="@+id/six"
+        layout="@layout/order_item_container" />
+
+    <include
+        android:id="@+id/seven"
+        layout="@layout/order_item_container" />
+
+    <include
+        android:id="@+id/eight"
+        layout="@layout/order_item_container" />
+
+    <include
+        android:id="@+id/nine"
+        layout="@layout/order_item_container" />
+
+    <include
+        android:id="@+id/ten"
+        layout="@layout/order_item_container" />
+
+
+
+</LinearLayout>

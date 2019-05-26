@@ -7,4 +7,8 @@ public class Constants {
 
     public static String User_NAME = "user_name";
     public static String USER_PASSWORD = "user_password";
+    public static String IS_REGISTERED_USER = "is_registered";
+
+    public static String ORDER_DETAILS_KEY = "order_details";
+
 }
